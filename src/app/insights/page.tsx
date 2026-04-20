@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { useDashboard } from "@/context/DashboardContext";
 import {
   computeStats,
@@ -29,10 +29,12 @@ import {
   ExternalLink,
   Trophy,
   AlertTriangle,
+  FileText,
 } from "lucide-react";
 
 export default function InsightsPage() {
   const { runs, loading, error, activeRepo, token, openaiKey } = useDashboard();
+  const [logsFetched, setLogsFetched] = useState(false);
 
   const stats = useMemo(() => computeStats(runs), [runs]);
   const workflows = useMemo(() => computeWorkflowBreakdowns(runs), [runs]);
@@ -49,6 +51,7 @@ export default function InsightsPage() {
         .filter((r) => r.status === "completed" && r.conclusion === "failure")
         .slice(0, 20)
         .map((r) => ({
+          id: r.id,
           name: r.name,
           branch: r.head_branch,
           event: r.event,
@@ -60,6 +63,31 @@ export default function InsightsPage() {
   );
 
   const fetchAnalysis = useCallback(async () => {
+    const runsWithLogs = await Promise.all(
+      failedRuns.slice(0, 5).map(async (r) => {
+        if (!activeRepo) return { ...r, logs: null };
+        try {
+          const params = new URLSearchParams({
+            owner: activeRepo.owner,
+            repo: activeRepo.repo,
+            runId: String(r.id),
+          });
+          const res = await fetch(`/api/github/logs?${params}`, {
+            headers: { "x-github-token": token },
+          });
+          if (!res.ok) return { ...r, logs: null };
+          const data = await res.json();
+          return { ...r, logs: data.logs as string };
+        } catch {
+          return { ...r, logs: null };
+        }
+      })
+    );
+
+    const remainingRuns = failedRuns.slice(5).map((r) => ({ ...r, logs: null }));
+    const allRuns = [...runsWithLogs, ...remainingRuns];
+    setLogsFetched(allRuns.some((r) => r.logs));
+
     const res = await fetch("/api/ai/analyze", {
       method: "POST",
       headers: {
@@ -67,7 +95,7 @@ export default function InsightsPage() {
         "x-openai-key": openaiKey,
       },
       body: JSON.stringify({
-        failedRuns,
+        failedRuns: allRuns,
         repoFullName: activeRepo ? `${activeRepo.owner}/${activeRepo.repo}` : "",
       }),
     });
@@ -77,7 +105,7 @@ export default function InsightsPage() {
     }
     const data = await res.json();
     return data.analysis;
-  }, [failedRuns, activeRepo, openaiKey]);
+  }, [failedRuns, activeRepo, openaiKey, token]);
 
   const fetchSummary = useCallback(async () => {
     const topFailing = workflows
@@ -159,13 +187,21 @@ export default function InsightsPage() {
           fetchFn={fetchSummary}
           openaiKey={openaiKey}
         />
-        <AIInsightsPanel
-          type="analysis"
-          title="Failure Root Cause Analysis"
-          description="AI analyzes your recent failures to find patterns, hypothesize root causes, and suggest prioritized fixes."
-          fetchFn={fetchAnalysis}
-          openaiKey={openaiKey}
-        />
+        <div className="space-y-2">
+          <AIInsightsPanel
+            type="analysis"
+            title="Failure Root Cause Analysis"
+            description="AI fetches actual workflow logs from GitHub, then analyzes error messages, stack traces, and failure patterns to identify root causes."
+            fetchFn={fetchAnalysis}
+            openaiKey={openaiKey}
+          />
+          {logsFetched && (
+            <div className="flex items-center gap-1.5 text-[11px] text-emerald-400/80 px-1">
+              <FileText className="h-3 w-3" />
+              Analysis included real log output from GitHub Actions
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Anomaly Alerts */}
