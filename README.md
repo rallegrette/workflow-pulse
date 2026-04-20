@@ -321,6 +321,48 @@ All requests use `Accept: application/vnd.github+json` and `X-GitHub-Api-Version
 
 ---
 
+## Testing
+
+The project includes 83 tests across 11 test suites covering the core logic, API routes, and UI components.
+
+```bash
+npm test              # Run all tests (unit + API)
+npm run test:unit     # Unit + component tests only (jsdom)
+npm run test:api      # API route tests only (node)
+npm run test:watch    # Watch mode for development
+npm run test:coverage # Run with coverage reports
+```
+
+### Test Structure
+
+```
+src/__tests__/
+├── fixtures.ts                     # Shared test factory (makeRun, makeSuccessRun, etc.)
+├── lib/
+│   ├── stats.test.ts               # 23 tests — computeStats, trends, breakdowns, formatDuration
+│   └── analytics.test.ts           # 30 tests — MTTR, flaky detection, anomalies, heatmap, streaks
+├── api/
+│   ├── github-runs.test.ts         # 5 tests  — GET /api/github/runs validation + proxy
+│   ├── github-workflows.test.ts    # 3 tests  — GET /api/github/workflows
+│   ├── ai-analyze.test.ts          # 3 tests  — POST /api/ai/analyze with mocked OpenAI
+│   └── ai-summary.test.ts          # 2 tests  — POST /api/ai/summary with mocked OpenAI
+└── components/
+    ├── StatCard.test.tsx            # 5 tests  — KPI card rendering, trends, subtitles
+    ├── AnomalyAlerts.test.tsx       # 4 tests  — Warning/critical alert rendering
+    ├── FlakyWorkflows.test.tsx      # 3 tests  — Flaky detection UI
+    ├── FailureStreaks.test.tsx       # 2 tests  — Streak display
+    └── BranchComparison.test.tsx    # 3 tests  — Branch health bars, truncation
+```
+
+### Test Approach
+
+- **Unit tests** (`lib/`) use a shared fixture factory to create `WorkflowRun` objects with specific overrides, keeping tests concise and readable
+- **API route tests** mock the underlying service functions (`fetchAllRecentRuns`, `fetchWorkflows`, OpenAI SDK) to isolate route handler logic — verifying parameter validation, error handling, and response formatting
+- **Component tests** use React Testing Library to verify rendering behavior without testing implementation details
+- Two separate Jest configs are used: `jest.config.ts` (jsdom environment for components + unit tests) and `jest.api.config.ts` (node environment for API routes that depend on Web APIs)
+
+---
+
 ## Scripts
 
 | Command | Description |
@@ -329,6 +371,11 @@ All requests use `Accept: application/vnd.github+json` and `X-GitHub-Api-Version
 | `npm run build` | Create optimized production build |
 | `npm start` | Serve the production build |
 | `npm run lint` | Run ESLint across the project |
+| `npm test` | Run all tests (unit + component + API) |
+| `npm run test:unit` | Unit and component tests only |
+| `npm run test:api` | API route tests only |
+| `npm run test:watch` | Watch mode for unit tests |
+| `npm run test:coverage` | Run all tests with coverage reports |
 
 ---
 
