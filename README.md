@@ -224,6 +224,7 @@ src/
 │   ├── BranchComparison.tsx          # Branch success rate comparison
 │   ├── FailureStreaks.tsx             # Consecutive failure tracker
 │   ├── FlakyWorkflows.tsx            # Flaky workflow detector UI
+│   ├── DateRangePicker.tsx            # Global date range filter (7d/30d/90d/all)
 │   ├── EmptyState.tsx                # Shown when no repo is configured
 │   ├── ExportButton.tsx              # CSV/JSON export dropdown button
 │   ├── LoadingState.tsx              # Spinner during initial data fetch
@@ -232,11 +233,11 @@ src/
 │   ├── StatCard.tsx                  # Reusable KPI metric card
 │   └── WorkflowTable.tsx             # Workflow breakdown with progress bars
 ├── context/
-│   └── DashboardContext.tsx          # Global state: tokens, repos, runs
+│   └── DashboardContext.tsx          # Global state: tokens, repos, runs, SSE streaming, date range
 └── lib/
     ├── analytics.ts                  # Anomaly detection, MTTR, flaky detection, heatmaps
     ├── export.ts                     # CSV/JSON export utilities with download trigger
-    ├── github.ts                     # GitHub REST API client functions
+    ├── github.ts                     # GitHub REST API client + log fetching/decompression
     ├── stats.ts                      # Core data processing & aggregation
     └── types.ts                      # Shared TypeScript interfaces
 ```
