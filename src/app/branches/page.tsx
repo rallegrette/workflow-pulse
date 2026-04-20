@@ -6,6 +6,7 @@ import { computeBranchBreakdowns } from "@/lib/stats";
 import { computeActivityHeatmap } from "@/lib/analytics";
 import BranchComparison from "@/components/BranchComparison";
 import ActivityHeatmap from "@/components/charts/ActivityHeatmap";
+import ExportButton from "@/components/ExportButton";
 import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
 import { GitBranch, ExternalLink } from "lucide-react";
@@ -48,19 +49,50 @@ export default function BranchesPage() {
       .sort((a, b) => b.totalRuns - a.totalRuns);
   }, [runs]);
 
+  const exportHeaders = ["Branch", "Runs", "Successes", "Failures", "Success Rate", "Contributors"];
+  const exportRows = useMemo(
+    () =>
+      branchDetails.map((b) => [
+        b.branch,
+        b.totalRuns,
+        b.successes,
+        b.failures,
+        `${b.successRate.toFixed(1)}%`,
+        b.actors.join("; "),
+      ]),
+    [branchDetails]
+  );
+
   if (!token || !activeRepo) return <EmptyState />;
   if (loading && runs.length === 0) return <LoadingState />;
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-7xl">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Branch Health</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          CI/CD health comparison across branches for{" "}
-          <span className="text-gray-400 font-mono">
-            {activeRepo.owner}/{activeRepo.repo}
-          </span>
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Branch Health</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            CI/CD health comparison across branches for{" "}
+            <span className="text-gray-400 font-mono">
+              {activeRepo.owner}/{activeRepo.repo}
+            </span>
+          </p>
+        </div>
+        {branchDetails.length > 0 && (
+          <ExportButton
+            headers={exportHeaders}
+            rows={exportRows}
+            jsonData={branchDetails.map((b) => ({
+              branch: b.branch,
+              totalRuns: b.totalRuns,
+              successes: b.successes,
+              failures: b.failures,
+              successRate: b.successRate,
+              contributors: b.actors,
+            }))}
+            filenameBase="branches"
+          />
+        )}
       </div>
 
       {error && (
@@ -74,7 +106,6 @@ export default function BranchesPage() {
         <ActivityHeatmap data={heatmap} />
       </div>
 
-      {/* Detailed branch table */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
