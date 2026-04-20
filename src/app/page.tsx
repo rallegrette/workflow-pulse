@@ -8,19 +8,31 @@ import {
   Clock,
   TrendingUp,
   Timer,
+  Shield,
+  Zap,
 } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
 import {
   computeStats,
   computeDailyTrends,
   computeWorkflowBreakdowns,
+  computeBranchBreakdowns,
   formatDuration,
 } from "@/lib/stats";
+import {
+  detectAnomalies,
+  detectFlakyWorkflows,
+  computeMTTR,
+  computeActivityHeatmap,
+} from "@/lib/analytics";
 import StatCard from "@/components/StatCard";
 import SuccessRateChart from "@/components/charts/SuccessRateChart";
 import RunVolumeChart from "@/components/charts/RunVolumeChart";
 import DurationChart from "@/components/charts/DurationChart";
 import WorkflowHealthChart from "@/components/charts/WorkflowHealthChart";
+import ActivityHeatmap from "@/components/charts/ActivityHeatmap";
+import AnomalyAlerts from "@/components/AnomalyAlerts";
+import BranchComparison from "@/components/BranchComparison";
 import RunsList from "@/components/RunsList";
 import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
@@ -31,6 +43,11 @@ export default function OverviewPage() {
   const stats = useMemo(() => computeStats(runs), [runs]);
   const trends = useMemo(() => computeDailyTrends(runs), [runs]);
   const workflows = useMemo(() => computeWorkflowBreakdowns(runs), [runs]);
+  const branches = useMemo(() => computeBranchBreakdowns(runs), [runs]);
+  const anomalies = useMemo(() => detectAnomalies(runs), [runs]);
+  const flaky = useMemo(() => detectFlakyWorkflows(runs), [runs]);
+  const mttr = useMemo(() => computeMTTR(runs), [runs]);
+  const heatmap = useMemo(() => computeActivityHeatmap(runs), [runs]);
 
   if (!token || !activeRepo) return <EmptyState />;
   if (loading && runs.length === 0) return <LoadingState />;
@@ -53,7 +70,11 @@ export default function OverviewPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* Anomaly alerts at the top for visibility */}
+      <AnomalyAlerts anomalies={anomalies} />
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4">
         <StatCard
           title="Total Runs"
           value={stats.totalRuns}
@@ -90,18 +111,41 @@ export default function OverviewPage() {
           icon={<Clock className="h-5 w-5" />}
           color="amber"
         />
+        <StatCard
+          title="MTTR"
+          value={mttr ? formatDuration(mttr.mttrSeconds) : "—"}
+          subtitle={mttr ? `${mttr.recoveryCount} recoveries` : "No data"}
+          icon={<Shield className="h-5 w-5" />}
+          color="blue"
+        />
+        <StatCard
+          title="Flaky"
+          value={flaky.length}
+          subtitle="workflows detected"
+          icon={<Zap className="h-5 w-5" />}
+          color={flaky.length > 0 ? "amber" : "emerald"}
+        />
       </div>
 
+      {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SuccessRateChart data={trends} />
         <RunVolumeChart data={trends} />
       </div>
 
+      {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DurationChart data={trends} />
         <WorkflowHealthChart data={workflows} />
       </div>
 
+      {/* Heatmap + Branch Health */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ActivityHeatmap data={heatmap} />
+        <BranchComparison branches={branches} />
+      </div>
+
+      {/* Recent Runs */}
       <div>
         <h2 className="text-lg font-semibold text-gray-200 mb-3">
           Recent Runs
