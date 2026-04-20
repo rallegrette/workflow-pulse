@@ -9,8 +9,8 @@ import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
 
 export default function WorkflowsPage() {
-  const { runs, loading, error, activeRepo, token } = useDashboard();
-  const workflows = useMemo(() => computeWorkflowBreakdowns(runs), [runs]);
+  const { runs, filteredRuns, loading, error, activeRepo, token } = useDashboard();
+  const workflows = useMemo(() => computeWorkflowBreakdowns(filteredRuns), [filteredRuns]);
 
   const exportHeaders = ["Workflow", "Runs", "Successes", "Failures", "Success Rate", "Avg Duration", "Last Run"];
   const exportRows = useMemo(

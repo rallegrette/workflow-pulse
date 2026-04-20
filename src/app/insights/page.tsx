@@ -59,7 +59,7 @@ export default function InsightsPage() {
           conclusion: r.conclusion || "",
           run_number: r.run_number,
         })),
-    [runs]
+    [filteredRuns]
   );
 
   const fetchAnalysis = useCallback(async () => {
