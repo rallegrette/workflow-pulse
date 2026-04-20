@@ -6,10 +6,13 @@ import {
   useState,
   useCallback,
   useEffect,
+  useRef,
   type ReactNode,
 } from "react";
 import type { WorkflowRun } from "@/lib/github";
 import type { RepoConfig } from "@/lib/types";
+
+export type DateRange = "7d" | "30d" | "90d" | "all";
 
 interface DashboardState {
   token: string;
@@ -20,6 +23,8 @@ interface DashboardState {
   loading: boolean;
   error: string | null;
   lastFetched: Date | null;
+  streaming: boolean;
+  dateRange: DateRange;
 }
 
 interface DashboardContextValue extends DashboardState {
@@ -28,7 +33,10 @@ interface DashboardContextValue extends DashboardState {
   addRepo: (repo: RepoConfig) => void;
   removeRepo: (repo: RepoConfig) => void;
   setActiveRepo: (repo: RepoConfig) => void;
+  setDateRange: (range: DateRange) => void;
+  filteredRuns: WorkflowRun[];
   refresh: () => Promise<void>;
+  toggleStreaming: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
@@ -56,6 +64,15 @@ function saveConfig(token: string, openaiKey: string, repos: RepoConfig[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, openaiKey, repos }));
 }
 
+function filterByDateRange(runs: WorkflowRun[], range: DateRange): WorkflowRun[] {
+  if (range === "all") return runs;
+  const daysMap: Record<string, number> = { "7d": 7, "30d": 30, "90d": 90 };
+  const days = daysMap[range] || 30;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  return runs.filter((r) => new Date(r.created_at) >= cutoff);
+}
+
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<DashboardState>(() => {
     const config = loadConfig();
@@ -68,8 +85,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       loading: false,
       error: null,
       lastFetched: null,
+      streaming: false,
+      dateRange: "all" as DateRange,
     };
   });
+
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   const setToken = useCallback((token: string) => {
     setState((s) => {
@@ -119,6 +140,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setState((s) => ({ ...s, activeRepo: repo }));
   }, []);
 
+  const setDateRange = useCallback((dateRange: DateRange) => {
+    setState((s) => ({ ...s, dateRange }));
+  }, []);
+
   const refresh = useCallback(async () => {
     setState((s) => {
       if (!s.token || !s.activeRepo) return s;
@@ -161,6 +186,67 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const stopStreaming = useCallback(() => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+    setState((s) => ({ ...s, streaming: false }));
+  }, []);
+
+  const startStreaming = useCallback(() => {
+    setState((s) => {
+      if (!s.token || !s.activeRepo) return s;
+
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+
+      const params = new URLSearchParams({
+        owner: s.activeRepo.owner,
+        repo: s.activeRepo.repo,
+        interval: "60000",
+      });
+
+      const es = new EventSource(`/api/stream?${params}`);
+
+      es.addEventListener("runs", (event) => {
+        const { runs, timestamp } = JSON.parse(event.data);
+        setState((prev) => ({
+          ...prev,
+          runs,
+          lastFetched: new Date(timestamp),
+        }));
+      });
+
+      es.addEventListener("error", () => {
+        stopStreaming();
+      });
+
+      eventSourceRef.current = es;
+      return { ...s, streaming: true };
+    });
+  }, [stopStreaming]);
+
+  const toggleStreaming = useCallback(() => {
+    setState((s) => {
+      if (s.streaming) {
+        stopStreaming();
+      } else {
+        startStreaming();
+      }
+      return s;
+    });
+  }, [startStreaming, stopStreaming]);
+
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (state.token && state.activeRepo) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data fetch on mount / config change
@@ -168,16 +254,21 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   }, [state.token, state.activeRepo, refresh]);
 
+  const filteredRuns = filterByDateRange(state.runs, state.dateRange);
+
   return (
     <DashboardContext.Provider
       value={{
         ...state,
+        filteredRuns,
         setToken,
         setOpenaiKey,
         addRepo,
         removeRepo,
         setActiveRepo,
+        setDateRange,
         refresh,
+        toggleStreaming,
       }}
     >
       {children}
