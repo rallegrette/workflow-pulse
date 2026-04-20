@@ -45,6 +45,10 @@ Built with **Next.js 16** · **TypeScript** · **Tailwind CSS 4** · **Recharts*
 
 ![Recent Runs](docs/runs.png)
 
+**Settings** — Configure your GitHub token, optional OpenAI API key, and manage monitored repositories.
+
+![Settings](docs/settings.png)
+
 ---
 
 ## Features
