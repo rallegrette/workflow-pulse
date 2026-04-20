@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useDashboard } from "@/context/DashboardContext";
 import RunsList from "@/components/RunsList";
+import ExportButton from "@/components/ExportButton";
 import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
 
@@ -29,6 +30,22 @@ export default function RunsPage() {
     );
   }, [runs, filter]);
 
+  const exportHeaders = ["Name", "Run #", "Branch", "Event", "Status", "Conclusion", "Created", "URL"];
+  const exportRows = useMemo(
+    () =>
+      filtered.map((r) => [
+        r.name,
+        r.run_number,
+        r.head_branch,
+        r.event,
+        r.status,
+        r.conclusion || "",
+        r.created_at,
+        r.html_url,
+      ]),
+    [filtered]
+  );
+
   if (!token || !activeRepo) return <EmptyState />;
   if (loading && runs.length === 0) return <LoadingState />;
 
@@ -45,20 +62,30 @@ export default function RunsPage() {
           </p>
         </div>
 
-        <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-lg p-1">
-          {FILTERS.map(({ value, label }) => (
-            <button
-              key={value}
-              onClick={() => setFilter(value)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                filter === value
-                  ? "bg-gray-700 text-white"
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-lg p-1">
+            {FILTERS.map(({ value, label }) => (
+              <button
+                key={value}
+                onClick={() => setFilter(value)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  filter === value
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-500 hover:text-gray-300"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {filtered.length > 0 && (
+            <ExportButton
+              headers={exportHeaders}
+              rows={exportRows}
+              jsonData={filtered}
+              filenameBase={`runs-${filter}`}
+            />
+          )}
         </div>
       </div>
 
