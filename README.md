@@ -216,15 +216,17 @@ src/
 │   ├── FailureStreaks.tsx             # Consecutive failure tracker
 │   ├── FlakyWorkflows.tsx            # Flaky workflow detector UI
 │   ├── EmptyState.tsx                # Shown when no repo is configured
+│   ├── ExportButton.tsx              # CSV/JSON export dropdown button
 │   ├── LoadingState.tsx              # Spinner during initial data fetch
 │   ├── RunsList.tsx                  # Run history feed with status icons
-│   ├── Sidebar.tsx                   # Navigation sidebar
+│   ├── Sidebar.tsx                   # Responsive navigation sidebar (mobile + desktop)
 │   ├── StatCard.tsx                  # Reusable KPI metric card
 │   └── WorkflowTable.tsx             # Workflow breakdown with progress bars
 ├── context/
 │   └── DashboardContext.tsx          # Global state: tokens, repos, runs
 └── lib/
     ├── analytics.ts                  # Anomaly detection, MTTR, flaky detection, heatmaps
+    ├── export.ts                     # CSV/JSON export utilities with download trigger
     ├── github.ts                     # GitHub REST API client functions
     ├── stats.ts                      # Core data processing & aggregation
     └── types.ts                      # Shared TypeScript interfaces
