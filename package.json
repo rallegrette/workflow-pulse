@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test": "jest --config jest.config.ts && jest --config jest.api.config.ts",
+    "test:unit": "jest --config jest.config.ts",
+    "test:api": "jest --config jest.api.config.ts",
+    "test:watch": "jest --config jest.config.ts --watch",
+    "test:coverage": "jest --config jest.config.ts --coverage && jest --config jest.api.config.ts --coverage"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
