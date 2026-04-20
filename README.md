@@ -8,7 +8,7 @@ Workflow Pulse connects to any GitHub repository and turns raw Actions data into
 
 ### Highlights
 
-- **AI Failure Analysis** — GPT-4o-mini analyzes recent failures, identifies patterns across workflows/branches/triggers, and generates prioritized fix recommendations
+- **AI Log Analysis** — Fetches actual workflow logs from GitHub, then GPT-4o-mini analyzes real error messages, stack traces, and failure output to identify exact root causes and suggest fixes
 - **AI Health Grading** — On-demand executive summary with a letter grade (A–F), key concerns, and action items informed by real pipeline metrics
 - **Anomaly Detection** — Statistical engine that flags failure rate spikes, duration regressions, and unusual build volume by comparing recent vs. historical cohorts
 - **Flaky Workflow Detection** — Scores workflows by pass/fail alternation frequency, with visual dot-pattern breakdowns of recent outcomes
@@ -16,6 +16,10 @@ Workflow Pulse connects to any GitHub repository and turns raw Actions data into
 - **Interactive Visualizations** — Success rate trends, stacked run volume, duration charts, workflow health rankings, branch comparisons, and a day×hour activity heatmap
 - **Data Export** — One-click CSV or JSON export on Workflows, Runs, and Branches pages for offline analysis or integration into other tools
 - **Mobile-Responsive** — Fully responsive sidebar with hamburger menu, backdrop overlay, and auto-close on navigation; skeleton loading states on every route
+- **Real-Time Streaming** — Server-Sent Events (SSE) endpoint for live dashboard updates; toggle live mode from the sidebar and watch runs appear in real time
+- **Multi-Repo Comparison** — Side-by-side comparison page showing success rates, durations, and failure counts across all configured repositories with automatic "Best" highlighting
+- **Date Range Filtering** — Global filter (7d / 30d / 90d / All) that adjusts all dashboard metrics, charts, and tables to the selected time window
+- **Docker Ready** — Multi-stage Dockerfile with standalone Next.js output and docker-compose for one-command deployment
 - **Error Boundaries** — Graceful error handling with retry capability at the root and per-route level, plus animated loading skeletons
 - **CI Pipeline** — GitHub Actions workflow with lint, type check, unit tests, API tests, and production build on every push and PR
 
