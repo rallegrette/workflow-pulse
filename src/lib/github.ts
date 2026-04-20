@@ -137,10 +137,17 @@ export async function fetchRunLogs(
     throw new Error(`GitHub API error: ${res.status} ${res.statusText}`);
   }
   const arrayBuffer = await res.arrayBuffer();
-  const { decompressSync } = await import("fflate");
-  const unzipped = decompressSync(new Uint8Array(arrayBuffer));
+  const { unzipSync } = await import("fflate");
+  const files = unzipSync(new Uint8Array(arrayBuffer));
   const decoder = new TextDecoder();
-  const fullText = decoder.decode(unzipped);
+
+  const parts: string[] = [];
+  for (const [name, data] of Object.entries(files)) {
+    const text = decoder.decode(data as Uint8Array);
+    parts.push(`=== ${name} ===\n${text}`);
+  }
+
+  const fullText = parts.join("\n\n");
   const maxLen = 12000;
   if (fullText.length <= maxLen) return fullText;
   return fullText.slice(fullText.length - maxLen);
