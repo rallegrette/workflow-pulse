@@ -11,23 +11,26 @@ import {
   RefreshCw,
   Sparkles,
   GitCompare,
+  BarChart3,
   Menu,
   X,
+  Radio,
 } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
 
 const NAV_ITEMS = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
-  { href: "/insights", label: "AI Insights", icon: Sparkles },
+  { href: "/insights", label: "AI Insights", icon: Sparkles, badge: "AI" },
   { href: "/workflows", label: "Workflows", icon: GitBranch },
   { href: "/branches", label: "Branches", icon: GitCompare },
+  { href: "/compare", label: "Compare", icon: BarChart3 },
   { href: "/runs", label: "Recent Runs", icon: Activity },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { activeRepo, loading, refresh, lastFetched } = useDashboard();
+  const { activeRepo, loading, refresh, lastFetched, streaming, toggleStreaming } = useDashboard();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const closeMobile = useCallback(() => setMobileOpen(false), []);
@@ -69,7 +72,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 p-3 space-y-1" role="navigation" aria-label="Main navigation">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {NAV_ITEMS.map(({ href, label, icon: Icon, badge }) => {
           const active = pathname === href;
           return (
             <Link
@@ -85,9 +88,9 @@ export default function Sidebar() {
             >
               <Icon className="h-4 w-4" />
               {label}
-              {label === "AI Insights" && (
+              {badge && (
                 <span className="text-[9px] bg-violet-500/15 text-violet-400 px-1.5 py-0.5 rounded-full font-medium ml-auto">
-                  AI
+                  {badge}
                 </span>
               )}
             </Link>
@@ -95,7 +98,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-gray-800 space-y-2">
         <button
           onClick={refresh}
           disabled={loading}
@@ -104,8 +107,19 @@ export default function Sidebar() {
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           {loading ? "Refreshing..." : "Refresh data"}
         </button>
+        <button
+          onClick={toggleStreaming}
+          className={`flex items-center gap-2 text-xs w-full transition-colors ${
+            streaming
+              ? "text-emerald-400 hover:text-emerald-300"
+              : "text-gray-500 hover:text-gray-300"
+          }`}
+        >
+          <Radio className={`h-3.5 w-3.5 ${streaming ? "animate-pulse" : ""}`} />
+          {streaming ? "Live updating" : "Enable live updates"}
+        </button>
         {lastFetched && (
-          <p className="text-[10px] text-gray-600 mt-1">
+          <p className="text-[10px] text-gray-600">
             Updated {lastFetched.toLocaleTimeString()}
           </p>
         )}
@@ -120,6 +134,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-emerald-400" />
           <span className="text-sm font-bold text-white">Workflow Pulse</span>
+          {streaming && <Radio className="h-3 w-3 text-emerald-400 animate-pulse" />}
         </div>
         <button
           onClick={() => setMobileOpen(true)}
