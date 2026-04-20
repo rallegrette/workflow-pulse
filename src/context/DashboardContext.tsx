@@ -13,6 +13,7 @@ import type { RepoConfig } from "@/lib/types";
 
 interface DashboardState {
   token: string;
+  openaiKey: string;
   repos: RepoConfig[];
   activeRepo: RepoConfig | null;
   runs: WorkflowRun[];
@@ -23,6 +24,7 @@ interface DashboardState {
 
 interface DashboardContextValue extends DashboardState {
   setToken: (token: string) => void;
+  setOpenaiKey: (key: string) => void;
   addRepo: (repo: RepoConfig) => void;
   removeRepo: (repo: RepoConfig) => void;
   setActiveRepo: (repo: RepoConfig) => void;
@@ -33,25 +35,31 @@ const DashboardContext = createContext<DashboardContextValue | null>(null);
 
 const STORAGE_KEY = "workflow-pulse-config";
 
-function loadConfig(): { token: string; repos: RepoConfig[] } {
-  if (typeof window === "undefined") return { token: "", repos: [] };
+function loadConfig(): { token: string; openaiKey: string; repos: RepoConfig[] } {
+  if (typeof window === "undefined") return { token: "", openaiKey: "", repos: [] };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { token: "", repos: [] };
-    return JSON.parse(raw);
+    if (!raw) return { token: "", openaiKey: "", repos: [] };
+    const parsed = JSON.parse(raw);
+    return {
+      token: parsed.token || "",
+      openaiKey: parsed.openaiKey || "",
+      repos: parsed.repos || [],
+    };
   } catch {
-    return { token: "", repos: [] };
+    return { token: "", openaiKey: "", repos: [] };
   }
 }
 
-function saveConfig(token: string, repos: RepoConfig[]) {
+function saveConfig(token: string, openaiKey: string, repos: RepoConfig[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, repos }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, openaiKey, repos }));
 }
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<DashboardState>({
     token: "",
+    openaiKey: "",
     repos: [],
     activeRepo: null,
     runs: [],
@@ -65,6 +73,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setState((s) => ({
       ...s,
       token: config.token,
+      openaiKey: config.openaiKey,
       repos: config.repos,
       activeRepo: config.repos[0] || null,
     }));
@@ -72,8 +81,15 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   const setToken = useCallback((token: string) => {
     setState((s) => {
-      saveConfig(token, s.repos);
+      saveConfig(token, s.openaiKey, s.repos);
       return { ...s, token };
+    });
+  }, []);
+
+  const setOpenaiKey = useCallback((openaiKey: string) => {
+    setState((s) => {
+      saveConfig(s.token, openaiKey, s.repos);
+      return { ...s, openaiKey };
     });
   }, []);
 
@@ -84,7 +100,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       );
       if (exists) return s;
       const repos = [...s.repos, repo];
-      saveConfig(s.token, repos);
+      saveConfig(s.token, s.openaiKey, repos);
       return {
         ...s,
         repos,
@@ -98,7 +114,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       const repos = s.repos.filter(
         (r) => !(r.owner === repo.owner && r.repo === repo.repo)
       );
-      saveConfig(s.token, repos);
+      saveConfig(s.token, s.openaiKey, repos);
       const activeRepo =
         s.activeRepo?.owner === repo.owner && s.activeRepo?.repo === repo.repo
           ? repos[0] || null
@@ -164,6 +180,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       value={{
         ...state,
         setToken,
+        setOpenaiKey,
         addRepo,
         removeRepo,
         setActiveRepo,
