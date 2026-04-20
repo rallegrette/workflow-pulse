@@ -253,8 +253,3 @@ curl -s -H "Authorization: Bearer YOUR_TOKEN" \
   https://api.github.com/rate_limit | jq '.rate'
 ```
 
----
-
-## License
-
-MIT
