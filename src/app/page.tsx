@@ -26,6 +26,7 @@ import {
   computeActivityHeatmap,
 } from "@/lib/analytics";
 import StatCard from "@/components/StatCard";
+import DateRangePicker from "@/components/DateRangePicker";
 import SuccessRateChart from "@/components/charts/SuccessRateChart";
 import RunVolumeChart from "@/components/charts/RunVolumeChart";
 import DurationChart from "@/components/charts/DurationChart";
@@ -38,30 +39,41 @@ import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
 
 export default function OverviewPage() {
-  const { runs, loading, error, activeRepo, token } = useDashboard();
+  const { runs, filteredRuns, loading, error, activeRepo, token, streaming } = useDashboard();
 
-  const stats = useMemo(() => computeStats(runs), [runs]);
-  const trends = useMemo(() => computeDailyTrends(runs), [runs]);
-  const workflows = useMemo(() => computeWorkflowBreakdowns(runs), [runs]);
-  const branches = useMemo(() => computeBranchBreakdowns(runs), [runs]);
-  const anomalies = useMemo(() => detectAnomalies(runs), [runs]);
-  const flaky = useMemo(() => detectFlakyWorkflows(runs), [runs]);
-  const mttr = useMemo(() => computeMTTR(runs), [runs]);
-  const heatmap = useMemo(() => computeActivityHeatmap(runs), [runs]);
+  const stats = useMemo(() => computeStats(filteredRuns), [filteredRuns]);
+  const trends = useMemo(() => computeDailyTrends(filteredRuns), [filteredRuns]);
+  const workflows = useMemo(() => computeWorkflowBreakdowns(filteredRuns), [filteredRuns]);
+  const branches = useMemo(() => computeBranchBreakdowns(filteredRuns), [filteredRuns]);
+  const anomalies = useMemo(() => detectAnomalies(filteredRuns), [filteredRuns]);
+  const flaky = useMemo(() => detectFlakyWorkflows(filteredRuns), [filteredRuns]);
+  const mttr = useMemo(() => computeMTTR(filteredRuns), [filteredRuns]);
+  const heatmap = useMemo(() => computeActivityHeatmap(filteredRuns), [filteredRuns]);
 
   if (!token || !activeRepo) return <EmptyState />;
   if (loading && runs.length === 0) return <LoadingState />;
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-7xl">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard Overview</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          CI/CD pipeline health for{" "}
-          <span className="text-gray-400 font-mono">
-            {activeRepo.owner}/{activeRepo.repo}
-          </span>
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-white">Dashboard Overview</h1>
+            {streaming && (
+              <span className="inline-flex items-center gap-1.5 text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                LIVE
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            CI/CD pipeline health for{" "}
+            <span className="text-gray-400 font-mono">
+              {activeRepo.owner}/{activeRepo.repo}
+            </span>
+          </p>
+        </div>
+        <DateRangePicker />
       </div>
 
       {error && (
@@ -70,10 +82,8 @@ export default function OverviewPage() {
         </div>
       )}
 
-      {/* Anomaly alerts at the top for visibility */}
       <AnomalyAlerts anomalies={anomalies} />
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4">
         <StatCard
           title="Total Runs"
@@ -127,30 +137,26 @@ export default function OverviewPage() {
         />
       </div>
 
-      {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SuccessRateChart data={trends} />
         <RunVolumeChart data={trends} />
       </div>
 
-      {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DurationChart data={trends} />
         <WorkflowHealthChart data={workflows} />
       </div>
 
-      {/* Heatmap + Branch Health */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ActivityHeatmap data={heatmap} />
         <BranchComparison branches={branches} />
       </div>
 
-      {/* Recent Runs */}
       <div>
         <h2 className="text-lg font-semibold text-gray-200 mb-3">
           Recent Runs
         </h2>
-        <RunsList runs={runs} limit={15} />
+        <RunsList runs={filteredRuns} limit={15} />
       </div>
     </div>
   );
