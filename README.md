@@ -27,6 +27,26 @@ Built with **Next.js 16** · **TypeScript** · **Tailwind CSS 4** · **Recharts*
 
 ---
 
+### Screenshots
+
+**Dashboard Overview** — KPI cards, success rate trends, run volume, duration charts, activity heatmap, and branch health at a glance.
+
+![Dashboard Overview](docs/dashboard.png)
+
+**AI Insights** — MTTR, flakiness, failure streaks, peak hours, slowest builds, and AI-powered analysis panels.
+
+![AI Insights](docs/insights.png)
+
+**Branch Health** — Per-branch success rates, activity heatmap, contributor breakdown, and CSV/JSON export.
+
+![Branch Health](docs/branches.png)
+
+**Recent Runs** — Filterable run history with status icons, durations, and one-click export.
+
+![Recent Runs](docs/runs.png)
+
+---
+
 ## Features
 
 ### Dashboard Overview
