@@ -6,7 +6,6 @@ import {
   formatDuration,
 } from "@/lib/stats";
 import {
-  makeRun,
   makeSuccessRun,
   makeFailureRun,
   makeCancelledRun,
