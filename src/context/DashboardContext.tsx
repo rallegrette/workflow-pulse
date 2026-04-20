@@ -58,27 +58,19 @@ function saveConfig(token: string, openaiKey: string, repos: RepoConfig[]) {
 }
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<DashboardState>({
-    token: "",
-    openaiKey: "",
-    repos: [],
-    activeRepo: null,
-    runs: [],
-    loading: false,
-    error: null,
-    lastFetched: null,
-  });
-
-  useEffect(() => {
+  const [state, setState] = useState<DashboardState>(() => {
     const config = loadConfig();
-    setState((s) => ({
-      ...s,
+    return {
       token: config.token,
       openaiKey: config.openaiKey,
       repos: config.repos,
       activeRepo: config.repos[0] || null,
-    }));
-  }, []);
+      runs: [],
+      loading: false,
+      error: null,
+      lastFetched: null,
+    };
+  });
 
   const setToken = useCallback((token: string) => {
     setState((s) => {
@@ -170,11 +162,18 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const refreshRef = useRef(refresh);
+  refreshRef.current = refresh;
+  const tokenRef = useRef(state.token);
+  tokenRef.current = state.token;
+  const activeRepoRef = useRef(state.activeRepo);
+  activeRepoRef.current = state.activeRepo;
+
   useEffect(() => {
-    if (state.token && state.activeRepo) {
-      refresh();
+    if (tokenRef.current && activeRepoRef.current) {
+      refreshRef.current();
     }
-  }, [state.token, state.activeRepo, refresh]);
+  }, [state.token, state.activeRepo]);
 
   return (
     <DashboardContext.Provider
