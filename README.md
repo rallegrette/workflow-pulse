@@ -1,6 +1,6 @@
 # Workflow Pulse
 
-[![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/<repo>/actions/workflows/ci.yml)
+[![CI](https://github.com/rallegrette/workflow-pulse/actions/workflows/ci.yml/badge.svg)](https://github.com/rallegrette/workflow-pulse/actions/workflows/ci.yml)
 
 **Real-time GitHub Actions dashboard with AI-powered CI/CD intelligence.**
 
