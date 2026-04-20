@@ -414,8 +414,3 @@ src/__tests__/
 
 **OpenAI:** AI analysis is on-demand only (not automatic). Each generation makes one API call using `gpt-4o-mini`. Typical cost is < $0.01 per analysis.
 
----
-
-## License
-
-MIT
