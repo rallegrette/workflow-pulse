@@ -13,6 +13,7 @@ import {
   makeFailureRun,
   resetIdCounter,
 } from "../fixtures";
+import { parseISO, getDay, getHours } from "date-fns";
 
 beforeEach(() => resetIdCounter());
 
@@ -238,26 +239,33 @@ describe("computeActivityHeatmap", () => {
   });
 
   it("increments the correct cell for a run", () => {
-    // 2026-04-15 is a Wednesday (day=3), 10:00 UTC (hour=10)
-    const runs = [
-      makeSuccessRun({ created_at: "2026-04-15T10:00:00Z" }),
-    ];
+    const ts = "2026-04-15T10:00:00Z";
+    const localDate = parseISO(ts);
+    const expectedDay = getDay(localDate);
+    const expectedHour = getHours(localDate);
 
+    const runs = [makeSuccessRun({ created_at: ts })];
     const heatmap = computeActivityHeatmap(runs);
-    const cell = heatmap.find((c) => c.day === 3 && c.hour === 10);
+    const cell = heatmap.find((c) => c.day === expectedDay && c.hour === expectedHour);
     expect(cell).toBeDefined();
     expect(cell!.count).toBe(1);
     expect(cell!.successRate).toBe(100);
   });
 
   it("computes success rate per cell correctly", () => {
+    const ts1 = "2026-04-15T10:00:00Z";
+    const ts2 = "2026-04-15T10:30:00Z";
+    const localDate = parseISO(ts1);
+    const expectedDay = getDay(localDate);
+    const expectedHour = getHours(localDate);
+
     const runs = [
-      makeSuccessRun({ created_at: "2026-04-15T10:00:00Z" }),
-      makeFailureRun({ created_at: "2026-04-15T10:30:00Z" }),
+      makeSuccessRun({ created_at: ts1 }),
+      makeFailureRun({ created_at: ts2 }),
     ];
 
     const heatmap = computeActivityHeatmap(runs);
-    const cell = heatmap.find((c) => c.day === 3 && c.hour === 10);
+    const cell = heatmap.find((c) => c.day === expectedDay && c.hour === expectedHour);
     expect(cell!.count).toBe(2);
     expect(cell!.successRate).toBe(50);
   });
