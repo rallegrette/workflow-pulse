@@ -1,8 +1,19 @@
 # Workflow Pulse
 
-A real-time GitHub Actions dashboard with AI-powered insights that visualizes CI/CD pipeline health, detects anomalies, identifies flaky workflows, and provides intelligent failure analysis across repositories.
+**Real-time GitHub Actions dashboard with AI-powered CI/CD intelligence.**
 
-Built with Next.js 16, TypeScript, Tailwind CSS 4, Recharts, and the OpenAI API.
+Workflow Pulse connects to any GitHub repository and turns raw Actions data into actionable insights — surfacing pipeline health trends, detecting anomalies in failure rates and build durations, identifying flaky workflows through statistical analysis, and generating AI-driven root cause analysis and executive health summaries via OpenAI.
+
+### Highlights
+
+- **AI Failure Analysis** — GPT-4o-mini analyzes recent failures, identifies patterns across workflows/branches/triggers, and generates prioritized fix recommendations
+- **AI Health Grading** — On-demand executive summary with a letter grade (A–F), key concerns, and action items informed by real pipeline metrics
+- **Anomaly Detection** — Statistical engine that flags failure rate spikes, duration regressions, and unusual build volume by comparing recent vs. historical cohorts
+- **Flaky Workflow Detection** — Scores workflows by pass/fail alternation frequency, with visual dot-pattern breakdowns of recent outcomes
+- **MTTR Tracking** — Computes Mean Time to Recovery across all failure→success transitions
+- **Interactive Visualizations** — Success rate trends, stacked run volume, duration charts, workflow health rankings, branch comparisons, and a day×hour activity heatmap
+
+Built with **Next.js 16** · **TypeScript** · **Tailwind CSS 4** · **Recharts** · **OpenAI API** · **83 tests**
 
 ---
 
