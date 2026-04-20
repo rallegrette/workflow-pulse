@@ -19,8 +19,8 @@ export default function BranchesPage() {
   const heatmap = useMemo(() => computeActivityHeatmap(filteredRuns), [filteredRuns]);
 
   const branchDetails = useMemo(() => {
-    const groups = new Map<string, typeof runs>();
-    for (const run of runs) {
+    const groups = new Map<string, typeof filteredRuns>();
+    for (const run of filteredRuns) {
       const existing = groups.get(run.head_branch) || [];
       existing.push(run);
       groups.set(run.head_branch, existing);
@@ -47,7 +47,7 @@ export default function BranchesPage() {
         };
       })
       .sort((a, b) => b.totalRuns - a.totalRuns);
-  }, [runs]);
+  }, [filteredRuns]);
 
   const exportHeaders = ["Branch", "Runs", "Successes", "Failures", "Success Rate", "Contributors"];
   const exportRows = useMemo(
