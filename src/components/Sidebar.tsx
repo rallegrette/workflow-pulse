@@ -75,6 +75,7 @@ export default function Sidebar() {
             <Link
               key={href}
               href={href}
+              onClick={closeMobile}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 active
                   ? "bg-emerald-500/10 text-emerald-400"
