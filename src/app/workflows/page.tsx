@@ -2,8 +2,9 @@
 
 import { useMemo } from "react";
 import { useDashboard } from "@/context/DashboardContext";
-import { computeWorkflowBreakdowns } from "@/lib/stats";
+import { computeWorkflowBreakdowns, formatDuration } from "@/lib/stats";
 import WorkflowTable from "@/components/WorkflowTable";
+import ExportButton from "@/components/ExportButton";
 import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
 
@@ -11,19 +12,44 @@ export default function WorkflowsPage() {
   const { runs, loading, error, activeRepo, token } = useDashboard();
   const workflows = useMemo(() => computeWorkflowBreakdowns(runs), [runs]);
 
+  const exportHeaders = ["Workflow", "Runs", "Successes", "Failures", "Success Rate", "Avg Duration", "Last Run"];
+  const exportRows = useMemo(
+    () =>
+      workflows.map((wf) => [
+        wf.name,
+        wf.totalRuns,
+        wf.successCount,
+        wf.failureCount,
+        `${wf.successRate.toFixed(1)}%`,
+        formatDuration(wf.avgDurationSeconds),
+        wf.lastRun,
+      ]),
+    [workflows]
+  );
+
   if (!token || !activeRepo) return <EmptyState />;
   if (loading && runs.length === 0) return <LoadingState />;
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-7xl">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Workflows</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Per-workflow breakdown for{" "}
-          <span className="text-gray-400 font-mono">
-            {activeRepo.owner}/{activeRepo.repo}
-          </span>
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Workflows</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Per-workflow breakdown for{" "}
+            <span className="text-gray-400 font-mono">
+              {activeRepo.owner}/{activeRepo.repo}
+            </span>
+          </p>
+        </div>
+        {workflows.length > 0 && (
+          <ExportButton
+            headers={exportHeaders}
+            rows={exportRows}
+            jsonData={workflows}
+            filenameBase="workflows"
+          />
+        )}
       </div>
 
       {error && (
