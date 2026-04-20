@@ -33,21 +33,21 @@ import {
 } from "lucide-react";
 
 export default function InsightsPage() {
-  const { runs, loading, error, activeRepo, token, openaiKey } = useDashboard();
+  const { runs, filteredRuns, loading, error, activeRepo, token, openaiKey } = useDashboard();
   const [logsFetched, setLogsFetched] = useState(false);
 
-  const stats = useMemo(() => computeStats(runs), [runs]);
-  const workflows = useMemo(() => computeWorkflowBreakdowns(runs), [runs]);
-  const anomalies = useMemo(() => detectAnomalies(runs), [runs]);
-  const flakyWorkflows = useMemo(() => detectFlakyWorkflows(runs), [runs]);
-  const failureStreaks = useMemo(() => detectFailureStreaks(runs), [runs]);
-  const mttr = useMemo(() => computeMTTR(runs), [runs]);
-  const slowest = useMemo(() => findSlowestRuns(runs, 5), [runs]);
-  const peakHours = useMemo(() => computePeakHours(runs), [runs]);
+  const stats = useMemo(() => computeStats(filteredRuns), [filteredRuns]);
+  const workflows = useMemo(() => computeWorkflowBreakdowns(filteredRuns), [filteredRuns]);
+  const anomalies = useMemo(() => detectAnomalies(filteredRuns), [filteredRuns]);
+  const flakyWorkflows = useMemo(() => detectFlakyWorkflows(filteredRuns), [filteredRuns]);
+  const failureStreaks = useMemo(() => detectFailureStreaks(filteredRuns), [filteredRuns]);
+  const mttr = useMemo(() => computeMTTR(filteredRuns), [filteredRuns]);
+  const slowest = useMemo(() => findSlowestRuns(filteredRuns, 5), [filteredRuns]);
+  const peakHours = useMemo(() => computePeakHours(filteredRuns), [filteredRuns]);
 
   const failedRuns = useMemo(
     () =>
-      runs
+      filteredRuns
         .filter((r) => r.status === "completed" && r.conclusion === "failure")
         .slice(0, 20)
         .map((r) => ({
