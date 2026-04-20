@@ -18,17 +18,17 @@ const FILTERS: { value: Filter; label: string }[] = [
 ];
 
 export default function RunsPage() {
-  const { runs, loading, error, activeRepo, token } = useDashboard();
+  const { runs, filteredRuns, loading, error, activeRepo, token } = useDashboard();
   const [filter, setFilter] = useState<Filter>("all");
 
   const filtered = useMemo(() => {
-    if (filter === "all") return runs;
+    if (filter === "all") return filteredRuns;
     if (filter === "in_progress")
-      return runs.filter((r) => r.status !== "completed");
-    return runs.filter(
+      return filteredRuns.filter((r) => r.status !== "completed");
+    return filteredRuns.filter(
       (r) => r.status === "completed" && r.conclusion === filter
     );
-  }, [runs, filter]);
+  }, [filteredRuns, filter]);
 
   const exportHeaders = ["Name", "Run #", "Branch", "Event", "Status", "Conclusion", "Created", "URL"];
   const exportRows = useMemo(

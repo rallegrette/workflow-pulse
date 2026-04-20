@@ -13,10 +13,10 @@ import { GitBranch, ExternalLink } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 
 export default function BranchesPage() {
-  const { runs, loading, error, activeRepo, token } = useDashboard();
+  const { runs, filteredRuns, loading, error, activeRepo, token } = useDashboard();
 
-  const branches = useMemo(() => computeBranchBreakdowns(runs), [runs]);
-  const heatmap = useMemo(() => computeActivityHeatmap(runs), [runs]);
+  const branches = useMemo(() => computeBranchBreakdowns(filteredRuns), [filteredRuns]);
+  const heatmap = useMemo(() => computeActivityHeatmap(filteredRuns), [filteredRuns]);
 
   const branchDetails = useMemo(() => {
     const groups = new Map<string, typeof runs>();
