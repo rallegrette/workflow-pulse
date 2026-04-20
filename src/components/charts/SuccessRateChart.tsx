@@ -52,7 +52,7 @@ export default function SuccessRateChart({ data }: Props) {
                 color: "#e5e7eb",
                 fontSize: "13px",
               }}
-              formatter={(value: number) => [`${value.toFixed(1)}%`, "Success Rate"]}
+              formatter={(value) => [`${Number(value).toFixed(1)}%`, "Success Rate"]}
             />
             <Area
               type="monotone"

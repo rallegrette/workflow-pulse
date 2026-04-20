@@ -46,7 +46,7 @@ export default function DurationChart({ data }: Props) {
                 color: "#e5e7eb",
                 fontSize: "13px",
               }}
-              formatter={(value: number) => [formatDuration(value), "Avg Duration"]}
+              formatter={(value) => [formatDuration(Number(value)), "Avg Duration"]}
             />
             <Line
               type="monotone"

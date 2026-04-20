@@ -66,7 +66,7 @@ export default function WorkflowHealthChart({ data }: Props) {
                 color: "#e5e7eb",
                 fontSize: "13px",
               }}
-              formatter={(value: number) => [`${value}%`, "Success Rate"]}
+              formatter={(value) => [`${value}%`, "Success Rate"]}
               labelFormatter={(_, payload) =>
                 payload?.[0]?.payload?.fullName || ""
               }
