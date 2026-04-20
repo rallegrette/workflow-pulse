@@ -206,6 +206,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         owner: s.activeRepo.owner,
         repo: s.activeRepo.repo,
         interval: "60000",
+        token: s.token,
       });
 
       const es = new EventSource(`/api/stream?${params}`);

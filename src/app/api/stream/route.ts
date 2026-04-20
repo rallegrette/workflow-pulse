@@ -4,7 +4,7 @@ import { fetchAllRecentRuns } from "@/lib/github";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const token = req.headers.get("x-github-token");
+  const token = req.nextUrl.searchParams.get("token") || req.headers.get("x-github-token");
   const owner = req.nextUrl.searchParams.get("owner");
   const repo = req.nextUrl.searchParams.get("repo");
   const intervalParam = req.nextUrl.searchParams.get("interval");
