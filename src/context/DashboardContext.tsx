@@ -6,7 +6,6 @@ import {
   useState,
   useCallback,
   useEffect,
-  useRef,
   type ReactNode,
 } from "react";
 import type { WorkflowRun } from "@/lib/github";
@@ -162,18 +161,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const refreshRef = useRef(refresh);
-  refreshRef.current = refresh;
-  const tokenRef = useRef(state.token);
-  tokenRef.current = state.token;
-  const activeRepoRef = useRef(state.activeRepo);
-  activeRepoRef.current = state.activeRepo;
-
   useEffect(() => {
-    if (tokenRef.current && activeRepoRef.current) {
-      refreshRef.current();
+    if (state.token && state.activeRepo) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data fetch on mount / config change
+      refresh();
     }
-  }, [state.token, state.activeRepo]);
+  }, [state.token, state.activeRepo, refresh]);
 
   return (
     <DashboardContext.Provider
