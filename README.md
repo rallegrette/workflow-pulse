@@ -1,5 +1,7 @@
 # Workflow Pulse
 
+[![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/<repo>/actions/workflows/ci.yml)
+
 **Real-time GitHub Actions dashboard with AI-powered CI/CD intelligence.**
 
 Workflow Pulse connects to any GitHub repository and turns raw Actions data into actionable insights — surfacing pipeline health trends, detecting anomalies in failure rates and build durations, identifying flaky workflows through statistical analysis, and generating AI-driven root cause analysis and executive health summaries via OpenAI.
@@ -12,6 +14,10 @@ Workflow Pulse connects to any GitHub repository and turns raw Actions data into
 - **Flaky Workflow Detection** — Scores workflows by pass/fail alternation frequency, with visual dot-pattern breakdowns of recent outcomes
 - **MTTR Tracking** — Computes Mean Time to Recovery across all failure→success transitions
 - **Interactive Visualizations** — Success rate trends, stacked run volume, duration charts, workflow health rankings, branch comparisons, and a day×hour activity heatmap
+- **Data Export** — One-click CSV or JSON export on Workflows, Runs, and Branches pages for offline analysis or integration into other tools
+- **Mobile-Responsive** — Fully responsive sidebar with hamburger menu, backdrop overlay, and auto-close on navigation; skeleton loading states on every route
+- **Error Boundaries** — Graceful error handling with retry capability at the root and per-route level, plus animated loading skeletons
+- **CI Pipeline** — GitHub Actions workflow with lint, type check, unit tests, API tests, and production build on every push and PR
 
 Built with **Next.js 16** · **TypeScript** · **Tailwind CSS 4** · **Recharts** · **OpenAI API** · **83 tests**
 
@@ -179,12 +185,22 @@ src/
 │   │   └── github/
 │   │       ├── runs/route.ts         # GET  — proxies workflow runs
 │   │       └── workflows/route.ts    # GET  — proxies workflow list
-│   ├── branches/page.tsx             # Branch health comparison
-│   ├── insights/page.tsx             # AI insights + anomaly detection
-│   ├── workflows/page.tsx            # Per-workflow breakdown table
-│   ├── runs/page.tsx                 # Filterable run history
+│   ├── branches/
+│   │   ├── page.tsx                  # Branch health comparison
+│   │   └── loading.tsx               # Branch page skeleton
+│   ├── insights/
+│   │   ├── page.tsx                  # AI insights + anomaly detection
+│   │   └── loading.tsx               # Insights page skeleton
+│   ├── workflows/
+│   │   ├── page.tsx                  # Per-workflow breakdown table
+│   │   └── loading.tsx               # Workflows page skeleton
+│   ├── runs/
+│   │   ├── page.tsx                  # Filterable run history
+│   │   └── loading.tsx               # Runs page skeleton
 │   ├── settings/page.tsx             # Token, API key & repo configuration
-│   ├── layout.tsx                    # Root layout (sidebar + provider)
+│   ├── error.tsx                     # Root error boundary with retry
+│   ├── loading.tsx                   # Root loading state
+│   ├── layout.tsx                    # Root layout (responsive sidebar + provider)
 │   ├── page.tsx                      # Dashboard overview
 │   └── globals.css                   # Tailwind imports + dark theme
 ├── components/
