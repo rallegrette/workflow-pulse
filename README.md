@@ -184,14 +184,19 @@ src/
 ├── app/                              # Next.js App Router
 │   ├── api/
 │   │   ├── ai/
-│   │   │   ├── analyze/route.ts      # POST — AI failure root cause analysis
+│   │   │   ├── analyze/route.ts      # POST — AI failure analysis with real log output
 │   │   │   └── summary/route.ts      # POST — AI pipeline health summary
-│   │   └── github/
-│   │       ├── runs/route.ts         # GET  — proxies workflow runs
-│   │       └── workflows/route.ts    # GET  — proxies workflow list
+│   │   ├── github/
+│   │   │   ├── logs/route.ts         # GET  — fetches & decompresses workflow run logs
+│   │   │   ├── runs/route.ts         # GET  — proxies workflow runs
+│   │   │   └── workflows/route.ts    # GET  — proxies workflow list
+│   │   └── stream/route.ts           # GET  — SSE endpoint for real-time run updates
 │   ├── branches/
 │   │   ├── page.tsx                  # Branch health comparison
 │   │   └── loading.tsx               # Branch page skeleton
+│   ├── compare/
+│   │   ├── page.tsx                  # Multi-repo side-by-side comparison
+│   │   └── loading.tsx               # Compare page skeleton
 │   ├── insights/
 │   │   ├── page.tsx                  # AI insights + anomaly detection
 │   │   └── loading.tsx               # Insights page skeleton
