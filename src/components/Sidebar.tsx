@@ -8,12 +8,16 @@ import {
   Settings,
   Activity,
   RefreshCw,
+  Sparkles,
+  GitCompare,
 } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
 
 const NAV_ITEMS = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
+  { href: "/insights", label: "AI Insights", icon: Sparkles },
   { href: "/workflows", label: "Workflows", icon: GitBranch },
+  { href: "/branches", label: "Branches", icon: GitCompare },
   { href: "/runs", label: "Recent Runs", icon: Activity },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -53,6 +57,11 @@ export default function Sidebar() {
             >
               <Icon className="h-4 w-4" />
               {label}
+              {label === "AI Insights" && (
+                <span className="text-[9px] bg-violet-500/15 text-violet-400 px-1.5 py-0.5 rounded-full font-medium ml-auto">
+                  AI
+                </span>
+              )}
             </Link>
           );
         })}
