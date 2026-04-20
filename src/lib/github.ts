@@ -122,3 +122,39 @@ export async function fetchAllRecentRuns(
   }
   return allRuns;
 }
+
+export async function fetchRunLogs(
+  token: string,
+  owner: string,
+  repo: string,
+  runId: number
+): Promise<string> {
+  const res = await fetch(
+    `${GITHUB_API}/repos/${owner}/${repo}/actions/runs/${runId}/logs`,
+    { headers: headers(token), redirect: "follow" }
+  );
+  if (!res.ok) {
+    throw new Error(`GitHub API error: ${res.status} ${res.statusText}`);
+  }
+  const arrayBuffer = await res.arrayBuffer();
+  const { decompressSync } = await import("fflate");
+  const unzipped = decompressSync(new Uint8Array(arrayBuffer));
+  const decoder = new TextDecoder();
+  const fullText = decoder.decode(unzipped);
+  const maxLen = 12000;
+  if (fullText.length <= maxLen) return fullText;
+  return fullText.slice(fullText.length - maxLen);
+}
+
+export async function fetchRunLogsSafe(
+  token: string,
+  owner: string,
+  repo: string,
+  runId: number
+): Promise<string | null> {
+  try {
+    return await fetchRunLogs(token, owner, repo, runId);
+  } catch {
+    return null;
+  }
+}
